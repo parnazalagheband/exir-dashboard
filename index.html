@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>exir-dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon/build/global/luxon.min.js"></script>
+    <link rel="stylesheet" href="/styles/main.css" />
+  </head>
+  <body>
+    <div id="loading" class="loading">
+      <div class="loading__rounded"></div>
+      <span>Loading...</span>
+    </div>
+    <div class="container">
+      <div class="table-container">
+        <h1 class="table-container__title">Coins Table</h1>
+        <table class="table-container__exir-table exir-table">
+          <thead class="table__header">
+            <tr>
+              <th>Logo</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Market Cap</th>
+            </tr>
+          </thead>
+          <tbody id="coins-table"></tbody>
+        </table>
+        <div class="table-container__buttons table-buttons">
+          <button class="table-buttons__button" id="btnCoinPrevious">
+            previous page
+          </button>
+          <button class="table-buttons__button" id="btnCoinNext">
+            next page
+          </button>
+        </div>
+      </div>
+      <div class="table-container">
+        <h1 class="table-container__title">Pairs Table</h1>
+        <table class="table-container__exir-table exir-table">
+          <thead class="table__header">
+            <tr>
+              <th>Base Pair</th>
+              <th>Pair2</th>
+              <th>Min Price</th>
+              <th>Max Price</th>
+            </tr>
+          </thead>
+          <tbody id="pairs-table"></tbody>
+        </table>
+        <div class="table-container__buttons table-buttons">
+          <button class="table-buttons__button" id="btnPairPrevious">
+            previous page
+          </button>
+          <button class="table-buttons__button" id="btnPairNext">
+            next page
+          </button>
+        </div>
+      </div>
+      <div class="chart-container">
+        <h1 class="chart-container__title">Chart</h1>
+        <div class="chart-container__chart-select chart-select">
+          <div>
+            <label class="chart-select__label" for="symbol">Symbol:</label>
+            <select class="chart-select__select-box" id="symbol">
+              <option value="btc-usdt">BTC/USDT</option>
+              <option value="eth-usdt">ETH/USDT</option>
+              <option value="xrp-usdt">XRP/USDT</option>
+              <option value="ada-usdt">ADA/USDT</option>
+              <option value="bnb-usdt">BNB/USDT</option>
+            </select>
+          </div>
+          <div>
+            <label class="chart-select__label" for="interval">Interval:</label>
+            <select class="chart-select__select-box" id="interval">
+              <option value="1D">1 Day</option>
+              <option value="3D">3 Day</option>
+              <option value="5D">5 Day</option>
+              <option value="7D">1 Week</option>
+            </select>
+          </div>
+          <div>
+            <label class="chart-select__label" for="fromDate">From:</label>
+            <input class="chart-select__input" type="date" id="fromDate" />
+          </div>
+          <div>
+            <label class="chart-select__label" for="toDate">To:</label>
+            <input class="chart-select__input" type="date" id="toDate" />
+          </div>
+          <button class="chart-select__button" id="createChart">Create Chart</button>
+        </div>
+        <div class="chart-container__empty-data" id="empty-data">
+          <span>There is no data in this interval!</span>
+        </div>
+        <div class="chart" id="chart"></div>
+      </div>
+    </div>
+    <script type="module" src="/scripts/tables.js"></script>
+    <script type="module" src="/scripts/chart.js"></script>
+  </body>
+</html>
