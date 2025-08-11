@@ -1,12 +1,19 @@
 import { getCoins } from "../scripts/api.js";
+import { getChartData } from "../scripts/api.js";
+const { DateTime } = luxon;
 
 const loading = document.getElementById("loading");
+const modal = document.getElementById("modal");
 const coinsTable = document.getElementById("coins-table");
 const pairsTable = document.getElementById("pairs-table");
 const btnCoinNext = document.getElementById("btnCoinNext");
 const btnCoinPrevious = document.getElementById("btnCoinPrevious");
 const btnPairNext = document.getElementById("btnPairNext");
 const btnPairPrevious = document.getElementById("btnPairPrevious");
+const closeBtn = document.querySelector(".chart-modal__close");
+const emptyData = document.getElementById("empty-chart-data");
+emptyData.style.display = "none";
+
 
 let currentCoinsPage = 1;
 let currentPairsPage = 1;
@@ -14,6 +21,8 @@ const ITEMS_PERPAGE = 20;
 let coins = [];
 let objectCoins = null;
 let pairs = [];
+
+let chart = null;
 
 const getCoinsTable = async () => {
   loading.style.display = "block";
@@ -33,6 +42,7 @@ const getCoinsTable = async () => {
 
 const createPairsTable = () => {
   if (!pairs || pairs.length === 0) return;
+  console.log(pairs);
 
   if (currentPairsPage === 1) {
     btnPairPrevious.disabled = true;
@@ -81,12 +91,79 @@ const createPairsTable = () => {
     pair2Wrapper.appendChild(imgpair2);
     pair2Wrapper.appendChild(textpair2);
     pair2.appendChild(pair2Wrapper);
+
+    tr.addEventListener("click", () => {
+      createPairChart(pair?.name);
+    });
+    tr.classList.add("pair");
     tr.appendChild(basePair);
     tr.appendChild(pair2);
     tr.appendChild(minPrice);
     tr.appendChild(maxPrice);
     pairsTable.appendChild(tr);
   });
+};
+
+const createPairChart = async (pair) => {
+  loading.style.display = "block";
+  modal.style.display = "block";
+  try {
+    const to = Math.floor(DateTime.now().endOf("day").toSeconds());
+    const from = Math.floor(
+      DateTime.now().minus({ days: 14 }).startOf("day").toSeconds()
+    );
+    const interval = "1D";
+    const response = await getChartData(pair, interval, from, to);
+    console.log(response);
+
+    const chartData = response.map((item) => ({
+      x: DateTime.fromISO(item.time).toMillis(),
+      y: item.volume.toFixed(1),
+    }));
+
+    if (!chartData.some((item) => item.y > 0)) {
+      emptyData.style.display = "block";
+      chart.destroy();
+      loading.style.display = "none";
+      return;
+    }
+
+    console.log(chartData);
+    const options = {
+      chart: {
+        type: "line",
+        height: 350,
+      },
+      series: [
+        {
+          name: "Volume",
+          data: chartData,
+        },
+      ],
+      xaxis: {
+        type: "datetime",
+        labels: {
+          datetimeUTC: false,
+        },
+      },
+      tooltip: {
+        x: {
+          format: "yyyy-MM-dd HH:mm",
+        },
+      },
+    };
+
+    if (chart) {
+      chart.destroy();
+    }
+
+    chart = new ApexCharts(document.getElementById("pair-chart"), options);
+    await chart.render();
+  } catch (error) {
+    console.log(error);
+    alert("we can't create chart");
+  }
+  loading.style.display = "none";
 };
 
 const createCoinTable = () => {
@@ -166,3 +243,7 @@ btnCoinNext.addEventListener("click", nextCoinsPage);
 btnCoinPrevious.addEventListener("click", prevCoinsPage);
 btnPairNext.addEventListener("click", nextPairsPage);
 btnPairPrevious.addEventListener("click", prevPairsPage);
+
+closeBtn.addEventListener("click", () => {
+  modal.style.display = "none";
+});

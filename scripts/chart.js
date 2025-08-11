@@ -48,13 +48,13 @@ const renderChart = (data, interval) => {
 
       result.push({
         time: part[0].time,
-        volume: +avg.toFixed(1),
+        volume: avg,
       });
     }
   }
   chartData = result.map((item) => ({
     x: DateTime.fromISO(item.time).toMillis(),
-    y: item.volume,
+    y: item.volume.toFixed(1),
   }));
 
   console.log(result);
