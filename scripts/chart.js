@@ -6,6 +6,7 @@ const emptyData = document.getElementById("empty-data");
 emptyData.style.display = "none";
 
 let chartData = [];
+const DEFAULT_INTERVAL = "1D";
 
 const drawChart = async () => {
   loading.style.display = "block";
@@ -26,46 +27,66 @@ const drawChart = async () => {
     );
     const to = Math.floor(DateTime.fromISO(toDate).endOf("day").toSeconds());
 
-    const response = await getChartData(symbol, interval, from, to);
-
-    chartData = response.map((item) => ({
-      x: DateTime.fromISO(item.time).toMillis(),
-      y: item.volume,
-    }));
-
-    if (!chartData.some((item) => item.y > 0)) {
-      emptyData.style.display = "block";
-      document.querySelector("#chart").innerHTML = "";
-      loading.style.display = "none";
-      return;
-    }
-
-    emptyData.style.display = "none";
-
-    const options = {
-      chart: {
-        type: "line",
-        height: 350,
-      },
-      series: [
-        {
-          name: "Volume",
-          data: chartData,
-        },
-      ],
-      xaxis: {
-        type: "datetime",
-      },
-    };
-
-    document.querySelector("#chart").innerHTML = "";
-    const chart = new ApexCharts(document.querySelector("#chart"), options);
-    chart.render();
+    const response = await getChartData(symbol, DEFAULT_INTERVAL, from, to);
+    console.log(response);
+    renderChart(response, interval);
   } catch (error) {
     console.log(error);
     alert("we can't create chart");
   }
   loading.style.display = "none";
+};
+
+const renderChart = (data, interval) => {
+  let result = [];
+  if (+interval == 1) {
+    result = data;
+  } else {
+    for (let i = 0; i < data.length; i += +interval) {
+      const part = data.slice(i, i + interval);
+      const avg = part.reduce((sum, item) => sum + item.volume, 0) / part.length;
+
+      result.push({
+        time: part[0].time,
+        volume: avg,
+      });
+    }
+  }
+  chartData = result.map((item) => ({
+    x: DateTime.fromISO(item.time).toMillis(),
+    y: item.volume,
+  }));
+
+  console.log(result);
+
+  if (!chartData.some((item) => item.y > 0)) {
+    emptyData.style.display = "block";
+    document.querySelector("#chart").innerHTML = "";
+    loading.style.display = "none";
+    return;
+  }
+
+  emptyData.style.display = "none";
+
+  const options = {
+    chart: {
+      type: "line",
+      height: 350,
+    },
+    series: [
+      {
+        name: "Volume",
+        data: chartData,
+      },
+    ],
+    xaxis: {
+      type: "datetime",
+    },
+  };
+
+  document.querySelector("#chart").innerHTML = "";
+  const chart = new ApexCharts(document.querySelector("#chart"), options);
+  chart.render();
 };
 
 document.getElementById("createChart").addEventListener("click", drawChart);
