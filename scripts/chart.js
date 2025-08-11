@@ -48,7 +48,7 @@ const renderChart = (data, interval) => {
 
       result.push({
         time: part[0].time,
-        volume: avg,
+        volume: +avg.toFixed(1),
       });
     }
   }
