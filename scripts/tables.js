@@ -10,10 +10,7 @@ const btnCoinNext = document.getElementById("btnCoinNext");
 const btnCoinPrevious = document.getElementById("btnCoinPrevious");
 const btnPairNext = document.getElementById("btnPairNext");
 const btnPairPrevious = document.getElementById("btnPairPrevious");
-const closeBtn = document.querySelector(".chart-modal__close");
-const emptyData = document.getElementById("empty-chart-data");
-emptyData.style.display = "none";
-
+const pairSelectBox = document.getElementById("symbol");
 
 let currentCoinsPage = 1;
 let currentPairsPage = 1;
@@ -101,12 +98,14 @@ const createPairsTable = () => {
     tr.appendChild(minPrice);
     tr.appendChild(maxPrice);
     pairsTable.appendChild(tr);
+
+    const newOption = new Option(pair?.name, pair?.name);
+    pairSelectBox.add(newOption);
   });
 };
 
 const createPairChart = async (pair) => {
   loading.style.display = "block";
-  modal.style.display = "block";
   try {
     const to = Math.floor(DateTime.now().endOf("day").toSeconds());
     const from = Math.floor(
@@ -115,6 +114,7 @@ const createPairChart = async (pair) => {
     const interval = "1D";
     const response = await getChartData(pair, interval, from, to);
     console.log(response);
+    symbol.value = pair;
 
     const chartData = response.map((item) => ({
       x: DateTime.fromISO(item.time).toMillis(),
@@ -157,7 +157,7 @@ const createPairChart = async (pair) => {
       chart.destroy();
     }
 
-    chart = new ApexCharts(document.getElementById("pair-chart"), options);
+    chart = new ApexCharts(document.getElementById("chart"), options);
     await chart.render();
   } catch (error) {
     console.log(error);
