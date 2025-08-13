@@ -43,11 +43,11 @@ const renderChart = (data, interval) => {
     result = data;
   } else {
     for (let i = 0; i < data.length; i += +interval) {
-      const part = data.slice(i, i + interval);
+      const part = data.slice(i, i + parseInt(interval));
       const avg = part.reduce((sum, item) => sum + item.volume, 0) / part.length;
 
       result.push({
-        time: part[0].time,
+        time: part[Math.floor((i + i + parseInt(interval) - 1) / 2)].time,
         volume: avg,
       });
     }
